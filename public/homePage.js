@@ -7,12 +7,6 @@ logoutButton.action = () => {
   });
 };
 
-ApiConnector.current((response) => {
-  if (response.success) {
-    ProfileWidget.showProfile(response.data);
-  }
-});
-
 const ratesBoard = new RatesBoard();
 
 function getCurrencyRates() {
@@ -25,7 +19,6 @@ function getCurrencyRates() {
 }
 
 getCurrencyRates();
-
 setInterval(getCurrencyRates, 60000);
 
 const moneyManager = new MoneyManager();
@@ -65,22 +58,22 @@ moneyManager.sendMoneyCallback = (data) => {
 
 const favoritesWidget = new FavoritesWidget();
 
-function updateFavorites() {
-  ApiConnector.getFavorites((response) => {
-    if (response.success) {
-      favoritesWidget.clearTable();
-      favoritesWidget.fillTable(response.data);
-      moneyManager.updateUsersList(response.data);
-    }
-  });
+function updateFavorites(data) {
+  favoritesWidget.clearTable();
+  favoritesWidget.fillTable(data);
+  moneyManager.updateUsersList(data);
 }
 
-updateFavorites();
+ApiConnector.getFavorites((response) => {
+  if (response.success) {
+    updateFavorites(response.data);
+  }
+});
 
 favoritesWidget.addUserCallback = (data) => {
   ApiConnector.addUserToFavorites(data, (response) => {
     if (response.success) {
-      updateFavorites();
+      updateFavorites(response.data);
       favoritesWidget.setMessage(
         true,
         "Пользователь успешно добавлен в избранное!"
@@ -94,7 +87,7 @@ favoritesWidget.addUserCallback = (data) => {
 favoritesWidget.removeUserCallback = (data) => {
   ApiConnector.removeUserFromFavorites(data, (response) => {
     if (response.success) {
-      updateFavorites();
+      updateFavorites(response.data);
       favoritesWidget.setMessage(
         true,
         "Пользователь успешно удалён из избранного!"
